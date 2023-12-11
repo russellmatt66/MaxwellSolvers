@@ -1,12 +1,6 @@
 # Overview
-Numerically solve Poisson's equation in 1D with periodic boundary conditions.
+Numerical codes for solving electromagnetic field problems
 
 # Directory Structure
-fft/ 
-- Solve using the Fast Fourier Transform
-
-finitedifferences/
-- Solving using a sparse matrix based on a finite difference stencil
-
-iterative/
-- Solve using an iterative procedure
+PoissonSolvers/
+- Codes that solve Poisson's equation by iterative, matrix, and frequency-based solution methods.
