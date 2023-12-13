@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 
 #include <cstdlib>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -13,6 +14,7 @@
 
 void initDataFile(std::ofstream& datafile);
 void callMatrixSolver(std::ofstream& datafile, size_t (*Solver)(const Eigen::SparseMatrix<double>&, Grid1d& , Eigen::VectorXd, Eigen::VectorXd, double, size_t), const Eigen::SparseMatrix<double>& A, Grid1d& Grid, Eigen::VectorXd rhoEig, Eigen::VectorXd phiEig);
+void initGridRho(Grid1d&, double (*RhoFunc)(double), size_t);
 
 namespace fs = std::filesystem;
 
@@ -29,17 +31,20 @@ int main(int argc, char* argv[]){
     // Initialize datafiles
     initDataFile(datafile_sparseLU);
 
-    // Initialize stencil, grid, and Eigen containers
+    // Create stencil, grid, and Eigen containers
     // double x_min = std::stod(argv[2]), x_max = std::stod(argv[3]);
     double x_min = -M_PI, x_max = M_PI;
     Grid1d testGrid (Nx,x_min,x_max);
+    double dx = testGrid.dx();
+    initGridRho(testGrid, sin, Nx);
+
     Eigen::SparseMatrix<double> A(Nx,Nx);
     A.reserve(Eigen::VectorXd::Constant(Nx,3)); // Poisson's equation so triangular
     Eigen::VectorXd rhoEig (A.rows());
     Eigen::VectorXd phiEig (A.rows());
-
-    double dx = testGrid.dx();
     size_t RoutineFlag = BuildSparseLaplacian(A, dx);
+
+    // Initialize Grid 
 
     // Call sparse LU solve
     callMatrixSolver(datafile_sparseLU, SparseLUFieldSolve, A, testGrid, rhoEig, phiEig);
@@ -60,5 +65,11 @@ void callMatrixSolver(std::ofstream& datafile, size_t (*Solver)(const Eigen::Spa
 
     for (size_t j = 0; j < Nx; j++){
         datafile << j << "," << Grid.RhoX(j) << "," << Grid.PhiX(j) << "," << Grid.EX(j) << std::endl;
+    }
+}
+
+void initGridRho(Grid1d& Grid, double (*RhoFunc)(double x), const size_t Nx){
+    for (size_t j = 0; j < Nx; j++){
+        Grid.RhoX(j) = RhoFunc(Grid.Xgrid(j));
     }
 }
