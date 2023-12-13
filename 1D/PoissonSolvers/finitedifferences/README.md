@@ -1,3 +1,6 @@
+# Overview
+Libraries for the finite difference solution
+
 # Directory Structure
 dense/ 
 - Solution using a dense matrix
