@@ -1,0 +1,8 @@
+Nxi=32
+Nxf=8192 
+x_min=-pi
+x_max=pi
+solver=SparseLUFieldSolve
+initRho=sin
+ki=1
+kf=20

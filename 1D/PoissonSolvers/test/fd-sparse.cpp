@@ -10,7 +10,7 @@
 #include <string>
 
 #include "../include/Grid1d.hpp"
-#include "../finitedifferences/sparse/sparsesolve.hpp"
+#include "../fd/sparse/sparsesolve.hpp"
 
 void initDataFile(std::ofstream& datafile);
 void callMatrixSolver(std::ofstream& datafile, size_t (*Solver)(const Eigen::SparseMatrix<double>&, Grid1d& , Eigen::VectorXd, Eigen::VectorXd, double, size_t), const Eigen::SparseMatrix<double>& A, Grid1d& Grid, Eigen::VectorXd rhoEig, Eigen::VectorXd phiEig);
@@ -18,7 +18,7 @@ void initGridRho(Grid1d&, double (*RhoFunc)(double), size_t);
 
 namespace fs = std::filesystem;
 
-// Driver code for testing finite differences
+// Proof-of-concept driver code for testing finite differences
 int main(int argc, char* argv[]){
     size_t Nx = std::stoi(argv[1]);
 
@@ -32,11 +32,9 @@ int main(int argc, char* argv[]){
     initDataFile(datafile_sparseLU);
 
     // Create stencil, grid, and Eigen containers
-    // double x_min = std::stod(argv[2]), x_max = std::stod(argv[3]);
     double x_min = -M_PI, x_max = M_PI;
     Grid1d testGrid (Nx,x_min,x_max);
     double dx = testGrid.dx();
-    initGridRho(testGrid, sin, Nx);
 
     Eigen::SparseMatrix<double> A(Nx,Nx);
     A.reserve(Eigen::VectorXd::Constant(Nx,3)); // Poisson's equation so triangular
@@ -45,6 +43,7 @@ int main(int argc, char* argv[]){
     size_t RoutineFlag = BuildSparseLaplacian(A, dx);
 
     // Initialize Grid 
+    initGridRho(testGrid, sin, Nx);
 
     // Call sparse LU solve
     callMatrixSolver(datafile_sparseLU, SparseLUFieldSolve, A, testGrid, rhoEig, phiEig);
